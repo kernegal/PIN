@@ -24,7 +24,7 @@
 
 (:action move_room
     :parameters ( ?r - robot ?y - area)
-    :precondition (and (at ?r ?x) (or (near ?x ?y) (near ?y ?x)) (allowed ?r ?y))
+    :precondition (and (at ?r ?x) (near ?x ?y) (allowed ?r ?y))
     :effect (and (not (at ?r ?x)) (at ?r ?y))
 )
 
