@@ -43,4 +43,5 @@
     (human_at H1 ROOM2) (human_at H2 ROOM3)
 )
 (:goal (and (human_has_coffee H1) (human_has_coffee H2)))
+(:metric minimize (total-time))
 )

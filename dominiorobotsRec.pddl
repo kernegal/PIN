@@ -1,7 +1,7 @@
 (define (domain ROBOTS)
-(:requirements :typing :durative-actions)
+(:requirements :typing :durative-actions :fluents)
 
-(:types robot area arm human - object
+(:types robot area arm human charger - object
         room hall - area
 )
 
@@ -11,13 +11,15 @@
              (cupboard_at ?r - area)
              (coffee_at ?r - area)
              (human_at ?h - human ?r - area)
-             (human_has_coffee ?h - human )
+             (human_has_coffee ?h - human)
 
              (allowed ?r - robot ?a - area)
              (near ?x - area ?y - area)
      
              (have_arm ?r - robot ?a - arm)
              (arm_state ?a - arm ?e - state)
+
+			 (charger_at ?r - area)
              
 
 )
@@ -25,6 +27,10 @@
 (:functions (distance ?a1 - area ?a2 - area)
 			(speed ?r - robot)
 			(weightCoffee ?s - state)
+			(energy ?r - robot)
+			(capacity ?r - robot)
+			(recharge-rate ?r - robot)
+			(total-energy-used)
 
 )
 
@@ -35,10 +41,13 @@
 				(at start (at ?r ?x)) 
 				(over all (or (near ?x ?y) (near ?y ?x))) 
 				(over all (allowed ?r ?y))
+				(at start (>= (energy ?r) (distance ?y ?x)))
 				)
     :effect (and 
 				(at start (not (at ?r ?x))) 
 				(at end (at ?r ?y))
+				(at end (increase total-energy-used (distance ?y ?x)))
+				(at end (decrease (energy ?r) (distance ?y ?x)))
 				)
 )
 
@@ -124,6 +133,17 @@
 				(at start (not (arm_state ?a1 empty))) 
 				(at end (arm_state ?a2 coffee))
 				)
+)
+
+(:durative-action recharge
+	:parameters (?r - robot ?h - area)
+	:duration (= ?duration (/ (- (capacity ?r) (energy ?r)) (recharge-rate ?r)))
+	:condition (and
+				(at start (< (energy ?r) (/ (capacity ?r) 2)))
+				(over all (at ?r ?h))
+				(over all (charger_at ?h))
+				)
+	:effect (at end (assign (energy ?r) (capacity ?r)))				
 )
 
 )
