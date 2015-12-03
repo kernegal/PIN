@@ -30,6 +30,7 @@
 			(energy ?r - robot)
 			(capacity ?r - robot)
 			(recharge-rate ?r - robot)
+			(energy-consum ?r - robot)
 			(total-energy-used)
 
 )
@@ -41,13 +42,13 @@
 				(at start (at ?r ?x)) 
 				(over all (or (near ?x ?y) (near ?y ?x))) 
 				(over all (allowed ?r ?y))
-				(at start (>= (energy ?r) (distance ?y ?x)))
+				(at start (>= (energy ?r) (* (distance ?y ?x) (energy-consum ?r))))
 				)
     :effect (and 
 				(at start (not (at ?r ?x))) 
 				(at end (at ?r ?y))
-				(at end (increase total-energy-used (distance ?y ?x)))
-				(at end (decrease (energy ?r) (distance ?y ?x)))
+				(at end (increase total-energy-used (* (distance ?y ?x) (energy-consum ?r))))
+				(at end (decrease (energy ?r) (* (distance ?y ?x) (energy-consum ?r))))
 				)
 )
 
@@ -59,10 +60,13 @@
 				(over all (cupboard_at ?h)) 
 				(over all (have_arm ?r ?a)) 
 				(at start (arm_state ?a empty))
+				(at start (>= (energy ?r) (/ (energy-consum ?r) 2)))
 				)
     :effect (and 
 				(at start (not (arm_state ?a empty))) 
 				(at end (arm_state ?a cup))
+				(at end (increase total-energy-used (/ (energy-consum ?r) 2)))
+				(at end (decrease (energy ?r) (/ (energy-consum ?r) 2)))
 				)
 )
 
@@ -74,10 +78,13 @@
 				(over all (coffee_at ?h)) 
 				(over all (have_arm ?r ?a)) 
 				(at start (arm_state ?a cup))
+				(at start (>= (energy ?r) (/ (energy-consum ?r) 2)))
 				)
     :effect (and 
 				(at start (not (arm_state ?a cup))) 
 				(at end (arm_state ?a coffee))
+				(at end (increase total-energy-used (/ (energy-consum ?r) 2)))
+				(at end (decrease (energy ?r) (/ (energy-consum ?r) 2)))
 				)
 )
 
@@ -89,11 +96,14 @@
 				(over all (human_at ?u ?h)) 
 				(over all (have_arm ?r ?a)) 
 				(at start (arm_state ?a coffee))
+				(at start (>= (energy ?r) (/ (energy-consum ?r) 2)))
 				)
     :effect (and 
 				(at start (not (arm_state ?a coffee))) 
 				(at end (arm_state ?a empty)) 
 				(at end (human_has_coffee ?u))
+				(at end (increase total-energy-used (/ (energy-consum ?r) 2)))
+				(at end (decrease (energy ?r) (/ (energy-consum ?r) 2)))
 				)
 )
 
@@ -107,12 +117,17 @@
 				(over all (have_arm ?r2 ?a2)) 
 				(at start (arm_state ?a1 cup)) 
 				(at start (arm_state ?a2 empty))
+				(at start (>= (energy ?r1) (/ (energy-consum ?r1) 2)))
+				(at start (>= (energy ?r2) (/ (energy-consum ?r2) 2)))
 				)
     :effect (and 
 				(at start (not (arm_state ?a1 cup))) 
 				(at end (arm_state ?a1 empty)) 
 				(at start (not (arm_state ?a1 empty))) 
 				(at end (arm_state ?a2 cup))
+				(at end (increase total-energy-used (+ (/ (energy-consum ?r1) 2) (/ (energy-consum ?r2) 2))))
+				(at end (decrease (energy ?r1) (/ (energy-consum ?r1) 2)))
+				(at end (decrease (energy ?r2) (/ (energy-consum ?r2) 2)))
 				)
 )
 
@@ -126,12 +141,17 @@
 				(over all (have_arm ?r2 ?a2)) 
 				(at start (arm_state ?a1 coffee)) 
 				(at start (arm_state ?a2 empty))
+				(at start (>= (energy ?r1) (/ (energy-consum ?r1) 2)))
+				(at start (>= (energy ?r2) (/ (energy-consum ?r2) 2)))
 				)
     :effect (and 
 				(at start (not (arm_state ?a1 coffee))) 
 				(at end (arm_state ?a1 empty)) 
 				(at start (not (arm_state ?a1 empty))) 
 				(at end (arm_state ?a2 coffee))
+				(at end (increase total-energy-used (+ (/ (energy-consum ?r1) 2) (/ (energy-consum ?r2) 2))))
+				(at end (decrease (energy ?r1) (/ (energy-consum ?r1) 2)))
+				(at end (decrease (energy ?r2) (/ (energy-consum ?r2) 2)))
 				)
 )
 
@@ -139,7 +159,7 @@
 	:parameters (?r - robot ?h - area)
 	:duration (= ?duration (/ (- (capacity ?r) (energy ?r)) (recharge-rate ?r)))
 	:condition (and
-				(at start (< (energy ?r) (/ (capacity ?r) 2)))
+				;;(at start (< (energy ?r) (/ (capacity ?r) 2)))
 				(over all (at ?r ?h))
 				(over all (charger_at ?h))
 				)
