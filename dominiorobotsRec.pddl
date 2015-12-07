@@ -1,5 +1,5 @@
 (define (domain ROBOTS)
-(:requirements :typing :durative-actions :fluents)
+(:requirements :typing :durative-actions :fluents :equality)
 
 (:types robot area arm human charger - object
         room hall - area
@@ -111,6 +111,7 @@
     :parameters (?r1 - robot ?r2 - robot ?h - area ?a1 - arm ?a2 - arm)
     :duration (= ?duration (weightCoffee cup))
 	:condition (and 
+	            (over all (not (= ?r1 ?r2)))
 				(over all (at ?r1 ?h)) 
 				(over all (at ?r2 ?h)) 
 				(over all (have_arm ?r1 ?a1)) 
@@ -135,6 +136,7 @@
     :parameters (?r1 - robot ?r2 - robot  ?h - area ?a1 - arm ?a2 - arm)
     :duration (= ?duration (weightCoffee coffee))
 	:condition (and 
+	            (over all (not (= ?r1 ?r2)))
 				(over all (at ?r1 ?h)) 
 				(over all (at ?r2 ?h)) 
 				(over all (have_arm ?r1 ?a1)) 
